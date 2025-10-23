@@ -1,15 +1,52 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import Icon from "@/components/ui/icon";
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState("home");
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const scrollToSection = (sectionId: string) => {
     setActiveSection(sectionId);
     const element = document.getElementById(sectionId);
     element?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/send-consultation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Заявка отправлена!",
+          description: "Я свяжусь с вами в ближайшее время.",
+        });
+        setFormData({ name: "", email: "", phone: "", message: "" });
+      } else {
+        throw new Error("Failed to send");
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка отправки",
+        description: "Попробуйте позже или свяжитесь напрямую.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const competencies = [
@@ -193,33 +230,87 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="contact" className="py-24 bg-primary text-primary-foreground">
+      <section id="contact" className="py-24 bg-secondary">
         <div className="container mx-auto px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-serif text-4xl md:text-5xl font-bold mb-8">Готовы к сотрудничеству?</h2>
-            <p className="text-xl mb-12 opacity-90">
-              Свяжитесь со мной для обсуждения вашего проекта в области финансового консалтинга и стратегического планирования
+          <div className="max-w-2xl mx-auto">
+            <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4 text-primary text-center">
+              Запись на консультацию
+            </h2>
+            <p className="text-lg text-muted-foreground mb-12 text-center">
+              Заполните форму, и я свяжусь с вами для обсуждения вашего проекта
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <a href="mailto:cfo@example.com" className="flex items-center gap-3 text-lg hover:opacity-80 transition-opacity">
-                <Icon name="Mail" className="w-6 h-6" />
-                <span>cfo@example.com</span>
-              </a>
-              <a href="tel:+79001234567" className="flex items-center gap-3 text-lg hover:opacity-80 transition-opacity">
-                <Icon name="Phone" className="w-6 h-6" />
-                <span>+7 (900) 123-45-67</span>
-              </a>
-            </div>
-            <div className="flex gap-4 justify-center mt-12">
-              <Button variant="secondary" size="icon" className="w-12 h-12 rounded-full">
-                <Icon name="Linkedin" className="w-5 h-5" />
-              </Button>
-              <Button variant="secondary" size="icon" className="w-12 h-12 rounded-full">
-                <Icon name="Twitter" className="w-5 h-5" />
-              </Button>
-              <Button variant="secondary" size="icon" className="w-12 h-12 rounded-full">
-                <Icon name="Mail" className="w-5 h-5" />
-              </Button>
+            
+            <Card className="p-8 shadow-lg">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Ваше имя</label>
+                  <Input
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Иван Иванов"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Email</label>
+                  <Input
+                    required
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="ivan@example.com"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Телефон</label>
+                  <Input
+                    required
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="+7 (900) 123-45-67"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-foreground">Сообщение</label>
+                  <Textarea
+                    required
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="Расскажите о вашем проекте и целях консультации"
+                    className="w-full min-h-32"
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-primary hover:bg-primary/90"
+                  size="lg"
+                >
+                  {isSubmitting ? "Отправка..." : "Отправить заявку"}
+                </Button>
+              </form>
+            </Card>
+
+            <div className="mt-12 text-center">
+              <p className="text-sm text-muted-foreground mb-4">Или свяжитесь напрямую:</p>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <a href="mailto:cfo@example.com" className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors">
+                  <Icon name="Mail" className="w-5 h-5" />
+                  <span>cfo@example.com</span>
+                </a>
+                <a href="tel:+79001234567" className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors">
+                  <Icon name="Phone" className="w-5 h-5" />
+                  <span>+7 (900) 123-45-67</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>
