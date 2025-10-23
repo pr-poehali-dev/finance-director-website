@@ -1,0 +1,23 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS request returns CORS headers",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "POST validates consultation request structure",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Иван Петров",
+        "email": "ivan@example.com",
+        "phone": "+7 900 123 45 67",
+        "message": "Хочу обсудить стратегическое финансовое планирование для моей компании"
+      },
+      "expectedStatus": 502,
+      "bodyMatcher": "partial"
+    }
+  ]
+}

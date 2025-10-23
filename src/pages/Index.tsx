@@ -23,7 +23,7 @@ const Index = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/send-consultation", {
+      const response = await fetch("https://functions.poehali.dev/500fe558-b65d-47b6-8a49-fb2684e11a67", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
